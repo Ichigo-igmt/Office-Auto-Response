@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Auto-Response</title>
+    <style>
+ body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Office Auto-Response</h1>
+        <div>
+            <!-- Select the activity and send it to the bot -->
+            <select id="selectActivity" onchange="logActivity()">
+                <option value="IN">In</option>
+                <option value="OFF">Off</option>
+                <option value="WASHROOM">Washroom</option>
+                <option value="EAT">Eat</option>
+                <option value="REST">Rest</option>
+                <option value="OUT">Out</option>
+                <option value="BREAK">Break</option>
+                <option value="SMOKE">Smoke</option>
+            </select>
+        </div>
+        <div>
+            <fieldset>
+                <legend>Office Activity</legend>
+            </fieldset>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Activity</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="activityData">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        var activities = [];
+
+        function logActivity() {
+            var selectedActivity = document.getElementById("selectActivity").value;
+            var timestamp = new Date().toLocaleTimeString();
+            
+            // Send activity data to the bot via an HTTP POST request
+            var requestData = {
+                chat_id: 'kuro0ski_bot', // Replace with the appropriate chat ID
+                activity: selectedActivity,
+                timestamp: timestamp
+            };
+
+            fetch('/log_activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Log the activity locally in the HTML
+                activities.push({ activity: selectedActivity, timestamp: timestamp });
+                var table = document.getElementById("activityData");
+                var row = table.insertRow(-1);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                cell1.innerHTML = activities.length;
+                cell2.innerHTML = selectedActivity;
+                cell3.innerHTML = timestamp;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>
